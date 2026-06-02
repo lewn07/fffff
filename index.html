@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Yeon+Sung&display=swap" rel="stylesheet">
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>중국 지리 탐험</title>
+
+<style>
+
+body{
+
+    margin:0;
+
+    font-family :sans-serif;
+
+    background:#f5f5f5;
+}
+
+.hidden{
+
+    display:none;
+}   
+
+.map-container{
+
+    position:relative;
+
+    width:100vw;
+
+    height:100vh;
+
+    overflow:hidden;
+}
+
+.map-image{
+
+    width:100%;
+
+    height:100%;
+
+    object-fit:cover;
+}
+
+.region-btn{
+
+    position:absolute;
+
+    background:none;
+
+    border:none;
+
+    padding:0;
+
+    cursor:pointer;
+}
+
+.icon-img{
+
+    width:250px;
+
+    transition:0.3s;
+}
+
+.icon-img:hover{
+
+    transform:scale(1.1);
+    filter: drop-shadow(0 0 12px white);
+}
+
+.overlay{
+
+    position:fixed;
+
+    top:0;
+    left:0;
+
+    width:100%;
+    height:100%;
+
+    background:rgba(0,0,0,0.5);
+
+    display:none;
+
+    z-index:999;
+}
+
+.popup{
+
+    position:fixed;
+
+    top:50%;
+    left:50%;
+
+    transform:translate(-50%, -50%);
+
+    width:700px;
+
+    background:white;
+
+    padding:30px;
+
+    border-radius:20px;
+
+    box-shadow:0 0 25px rgba(0,0,0,0.3);
+
+    display:none;
+
+    z-index:1000;
+}
+.close-btn{
+
+    margin-top:20px;
+
+    padding:10px 18px;
+
+    border:none;
+
+    border-radius:10px;
+
+    background:black;
+
+    color:white;
+
+    cursor:pointer;
+
+    font-size:16px;
+}
+
+.info-section{
+
+    display:flex;
+
+    gap:25px;
+
+    align-items:center;
+
+    margin-top:20px;
+}
+
+.info-text{
+
+    flex:1;
+
+    line-height:1.8;
+
+    font-size:18px;
+}
+
+.carousel{
+
+    position:relative;
+
+    width:100%;
+
+    height:300px;
+
+    overflow:hidden;
+
+    border-radius:15px;
+
+    margin-bottom:20px;
+}
+
+.carousel img{
+
+    width:100%;
+
+    height:100%;
+
+    object-fit:cover;
+}
+
+.carousel-btn{
+
+    position:absolute;
+
+    top:50%;
+
+    transform:translateY(-50%);
+
+    width:45px;
+
+    height:45px;
+
+    border:none;
+
+    border-radius:50%;
+
+    background:rgba(0,0,0,0.5);
+
+    color:white;
+
+    cursor:pointer;
+}
+
+.left{
+
+    left:10px;
+}
+
+.right{
+
+    right:10px;
+}
+
+.page-btn{
+
+    width:50px;
+
+    height:50px;
+
+    border:none;
+
+    border-radius:50%;
+
+    cursor:pointer;
+
+    font-size:22px;
+}
+
+.info-section{
+
+    display:flex;
+
+    gap:20px;
+
+    align-items:flex-start;
+}
+
+.basic-info{
+
+    text-align: center;
+    flex:1;
+    font-size: 30px;
+    font-weight: bold;
+    color: #4b241fb9;
+}
+
+body{
+    margin:0;
+    background:#4b241fb9;
+    font-family:'Yeon Sung', cursive;
+}
+
+.popup-title{
+
+    margin-top: 0;
+
+    text-align:center;
+
+    font-size:70px;
+
+    margin-bottom:20px;
+
+    color: #4b241fd3;
+}
+
+.popup-text{
+    flex:1;
+    font-size: 30px;
+    font-weight: bold;
+    color: #4b241fb9;
+}
+
+.map-image{
+    animation: zoomInMap 1.5s ease-out forwards;
+}
+
+@keyframes zoomInMap{
+    from{
+        transform:scale(1) translateX(0) translateY(0);
+    }
+    to{
+        transform:scale(1.5) translateX(-120px) translateY(-100px);
+    }
+}
+
+.start-fade{
+    opacity:0;
+    animation:fadeIn 1s ease forwards;
+    animation-delay:2s;
+}
+
+@keyframes fadeIn{
+
+    from{
+        opacity:0;
+    }
+
+    to{
+        opacity:1;
+    }
+}
+
+.fade-in{
+    animation:fadeIn 0.5s ease forwards;
+}
+
+</style>
+
+</head>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Yeon+Sung&display=swap" rel="stylesheet">
+
+
+<body>
+    <div
+class="overlay"
+id="overlay">
+</div>
+
+<div class="map-container">
+
+    <img
+    src="images/china-maps.png"
+    class="map-image">
+
+    <button
+    class="region-btn start-fade"
+    style="top:44%; left:32%;"
+    onclick="openRegion('sichuan')">
+
+        <img
+        src="images/sichuan.png"
+        class="icon-img">
+
+    <button
+id="guangdongBtn"
+class="region-btn hidden"
+style="top:75%; left:54%;"
+onclick="openRegion('guangdong')">
+
+    <img
+    src="images/guangdong.png"
+    class="icon-img">
+
+<button
+id="shandongBtn"
+class="region-btn hidden"
+style="top:21%; left:65%;"
+onclick="openRegion('shandong')">
+
+    <img
+    src="images/shandong.png"
+    class="icon-img">
+
+<button
+id="jiangsuBtn"
+class="region-btn hidden"
+style="top:35%; left:67%;"
+onclick="openRegion('jiangsu')">
+
+    <img
+    src="images/jiangsu.png"
+    class="icon-img">
+
+<button
+id="anhuiBtn"
+class="region-btn hidden"
+style="top:43%; left:61%;"
+onclick="openRegion('anhui')">
+
+    <img
+    src="images/anhui.png"
+    class="icon-img">
+
+<button
+id="zhejiangBtn"
+class="region-btn hidden"
+style="top:52%; left:68%;"
+onclick="openRegion('zhejiang')">
+
+    <img
+    src="images/zhejiang.png"
+    class="icon-img">
+
+<button
+id="fujianBtn"
+class="region-btn hidden"
+style="top:64%; left:63%;"
+onclick="openRegion('fujian')">
+
+    <img
+    src="images/fujian.png"
+    class="icon-img">
+
+<button
+id="hunanBtn"
+class="region-btn hidden"
+style="top:58%; left:49%;"
+onclick="openRegion('hunan')">
+
+    <img
+    src="images/hunan.png"
+    class="icon-img">
+
+</button>
+
+</div>
+
+<div class="popup" id="regionPopup">
+
+    <div id="page1">
+
+        <h2 id="popupTitle" class="popup-title"></h2>
+
+        <h2 id="popupTitle"></h2>
+
+        <!-- 캐러셀 -->
+
+        <div class="carousel">
+
+            <img
+            id="carouselImage"
+            src="">
+
+            <button
+            class="carousel-btn left"
+            onclick="prevImage()">
+
+            ◀
+
+            </button>
+
+            <button
+            class="carousel-btn right"
+            onclick="nextImage()">
+
+            ▶
+
+            </button>
+
+        </div>
+
+        <!-- 지도 + 설명 -->
+
+        <div class="info-section">
+
+            <iframe
+            id="popupMap"
+            width="300"
+            height="300">
+            </iframe>
+
+            <div class="basic-info">
+
+                <p id="popupLocation"></p>
+
+                <p id="popupClimate"></p>
+
+                <p id="popupTerrain"></p>
+
+            </div>
+
+        </div>
+
+        <div style="text-align:right;">
+
+            <button
+            class="page-btn"
+            onclick="nextPage()">
+
+            ▶
+
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- 2페이지 -->
+
+    <div
+    id="page2"
+    class="hidden">
+
+    <h2 id="popupTitle2" class="popup-title"></h2>
+
+        <h2 id="popupTitle" class="popup-title"></h2>
+
+        <h2 id="popupTitle2" class="popup-title"></h2>
+
+        <div id="popupText2" class="popup-text"></div>
+
+        <div
+        style="
+        display:flex;
+        justify-content:space-between;
+        margin-top:20px;
+        ">
+
+            <button
+            class="page-btn"
+            onclick="prevPage()">
+
+            ◀
+
+            </button>
+
+            <button
+            class="close-btn"
+            onclick="closeRegion()">
+
+            탐험 완료
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+const regions = {
+
+    sichuan:{
+
+        title:"쓰촨",
+
+        location:"중국 서남부",
+
+        climate:"고온다습",
+
+        terrain:"쓰촨 분지",
+
+        text1:"쓰촨은 중국 서남부에 위치하며 분지 지형이 발달하였다.",
+
+        text2:"습하고 더운 기후로 인해 향신료와 매운 음식 문화가 발달하였다.",
+
+        map:"https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d14147399.942594174!2d103.169517!3d30.038146999999995!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x36e4e73368bdcdb3%3A0xde8f7ccf8f99feb9!2z7KSR6rWtIOyTsOy0qCDshLE!5e0!3m2!1sko!2skr!4v1780304430462!5m2!1sko!2skr",
+
+        images:[
+
+            "images/sichuan1.jpg",
+            "images/sichuan2.jpg",
+            "images/sichuan3.jpg",
+            "images/sichuan4.jpg",
+            "images/sichuan5.jpg"
+        ],
+        
+        next:"guangdongBtn"
+    },
+
+    guangdong:{
+
+        title:"광둥",
+
+        location:"중국 남부, 남중국해 연안",
+
+        climate:"아열대 몬순기후로 인해 고온다습",
+
+        terrain:"해안 평야와 구릉, 하천 삼각주",
+
+        text1:"중국 남부의 해안 지역이다.",
+
+        text2:"해상 무역의 영향으로 다양한 식문화가 발달하였다.",
+
+        map:"https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3767084.8979239212!2d110.85091415147825!3d22.773030695509696!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x315285f132af5c3f%3A0x2ed41c6f09259f29!2z7KSR6rWtIOq0keuRpSDshLE!5e0!3m2!1sko!2skr!4v1780301722794!5m2!1sko!2skr",
+        
+        images:[
+            "images/guangdong1.jpg"
+        ],
+
+        next:"shandongBtn"
+    },
+
+    shandong:{
+
+        title:"산둥",
+
+        location:"중국 동부, 황해 및 발해 연안",
+
+        climate:"사계절이 뚜렷한 온대 몬순기후",
+
+        terrain:"반도 지형과 평야, 낮은 산지",
+
+        text1:"example",
+
+        text2:"밀 재배가 활발하여 면 요리가 발달하였다.",
+
+        map:"https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3282680.5343073294!2d116.13229066824283!3d36.536201170239124!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x358fcd4735ab4f7f%3A0xd93a2e2370e1b364!2z7KSR6rWtIOyCsOuRpSDshLE!5e0!3m2!1sko!2skr!4v1780301851469!5m2!1sko!2skr",
+
+        
+        images:[
+            "images/guangdong1.jpg"
+        ],
+
+        next:"jiangsuBtn"
+    },
+
+    jiangsu:{
+
+        title:"장쑤",
+
+        location:"중국 동부, 양쯔강 하류",
+
+        climate:"온난습윤한 몬순기후",
+
+        terrain:"넓은 평야와 호수, 수로 발달",
+
+        text1:"example",
+
+        text2:"밀 재배가 활발하여 면 요리가 발달하였다.",
+
+        map:"https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3429656.825767709!2d116.53825454224747!3d32.91735185443828!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x35b700da314bc245%3A0x8d94eab66c8553b5!2z7KSR6rWtIOyepeyRpCDshLE!5e0!3m2!1sko!2skr!4v1780316647747!5m2!1sko!2skr",
+
+        
+        images:[
+            "images/guangdong1.jpg"
+        ],
+
+        next:"anhuiBtn"
+    },
+
+    anhui:{
+
+        title:"안후이",
+
+        location:"중국 동부 내륙",
+
+        climate:"북부 온대, 남부 아열대 기후",
+
+        terrain:"평야와 산지가 분포",
+
+        text1:"example",
+
+        text2:"밀 재배가 활발하여 면 요리가 발달하였다.",
+
+        map:"https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3464694.6473732903!2d114.62591405545409!3d32.00181463881605!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3434a48ca17082d7%3A0x7aa8d6156e75706d!2z7KSR6rWtIOyViO2bhOydtCDshLE!5e0!3m2!1sko!2skr!4v1780316696032!5m2!1sko!2skr",
+
+        
+        images:[
+            "images/guangdong1.jpg"
+        ],
+
+        next:"zhejiangBtn"
+    },
+
+    zhejiang:{
+
+        title:"저장",
+
+        location:"동중국해 연안",
+
+        climate:"강수량이 풍부한 아열대 몬순기후",
+
+        terrain:"많은 산지와 구릉, 복잡한 해안선",
+
+        text1:"example",
+
+        text2:"밀 재배가 활발하여 면 요리가 발달하였다.",
+
+        map:"https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1785031.3993632623!2d119.18772321251942!3d29.09418161364685!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x34491234a50accbf%3A0x81ef71c536187cb7!2z7KSR6rWtIOyggOyepSDshLE!5e0!3m2!1sko!2skr!4v1780316757466!5m2!1sko!2skr",
+
+        
+        images:[
+            "images/guangdong1.jpg"
+        ],
+
+        next:"fujianBtn"
+    },
+
+    fujian:{
+
+        title:"푸젠",
+
+        location:"대만해협 연안",
+
+        climate:"고온다습한 아열대 몬순기후",
+
+        terrain:"산지가 대부분이며 좁은 해안 평야",
+
+        text1:"example",
+
+        text2:"밀 재배가 활발하여 면 요리가 발달하였다.",
+
+        map:"https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3712228.5475667436!2d116.9264612563519!3d25.51014455161749!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x341554d37044f9db%3A0x4eee34b4e4db50e8!2z7KSR6rWtIO2RuOygoCDshLE!5e0!3m2!1sko!2skr!4v1780316877313!5m2!1sko!2skr",
+
+        
+        images:[
+            "images/guangdong1.jpg"
+        ],
+
+        next:"hunanBtn"
+    },
+
+    hunan:{
+
+        title:"후난",
+
+        location:"양쯔강 중류 남쪽",
+
+        climate:"아열대 습윤기후",
+
+        terrain:"분지와 호수, 주변 산지로 둘러싸임",
+
+        text1:"example",
+
+        text2:"밀 재배가 활발하여 면 요리가 발달하였다.",
+
+        map:"https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3628501.187514576!2d108.88564488203176!3d27.361402442455585!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3420ba186987384d%3A0xcc21910be4ae2ce5!2z7KSR6rWtIO2bhOuCnCDshLE!5e0!3m2!1sko!2skr!4v1780316911575!5m2!1sko!2skr",
+
+        
+        images:[
+            "images/guangdong1.jpg"
+        ],
+
+        next:null
+    }
+}
+
+let currentRegion = "";
+
+let currentImage = 0;
+
+function openRegion(region){
+
+    currentRegion = region;
+
+    const data = regions[region];
+
+    currentImage = 0;
+
+    document.getElementById("carouselImage")
+    .src = data.images[0];
+
+    document.getElementById("popupTitle")
+    .innerText = data.title;
+
+    document.getElementById("popupTitle2")
+    .innerText = data.title;
+
+    document.getElementById("popupLocation")
+    .innerText = "위치: " + data.location;
+
+    document.getElementById("popupClimate")
+    .innerText = "기후: " + data.climate;
+
+    document.getElementById("popupTerrain")
+    .innerText = "지형: " + data.terrain;
+
+    document.getElementById("popupText2")
+    .innerText = data.text2;
+
+    document.getElementById("popupMap")
+    .src = data.map;
+
+    document.getElementById("overlay")
+    .style.display = "block";
+
+    document.getElementById("regionPopup")
+    .style.display = "block";
+}
+
+function closeRegion(){
+
+    document.getElementById("overlay")
+    .style.display = "none";
+
+    document.getElementById("regionPopup")
+    .style.display = "none";
+
+    const nextBtn =
+    regions[currentRegion].next;
+
+    if(nextBtn){
+
+        document
+        .getElementById(nextBtn)
+        .classList.remove("hidden");
+
+        document.getElementById(nextBtn)
+        .classList.add("fade-in");
+    }
+
+    document.getElementById("page2")
+    .classList.add("hidden");
+
+    document.getElementById("page1")
+    .classList.remove("hidden");
+}
+
+function nextImage(){
+
+    const data =
+    regions[currentRegion];
+
+    currentImage++;
+
+    if(currentImage >= data.images.length){
+
+        currentImage = 0;
+    }
+
+    document.getElementById("carouselImage")
+    .src = data.images[currentImage];
+}
+
+function prevImage(){
+
+    const data =
+    regions[currentRegion];
+
+    currentImage--;
+
+    if(currentImage < 0){
+
+        currentImage =
+        data.images.length - 1;
+    }
+
+    document.getElementById("carouselImage")
+    .src = data.images[currentImage];
+}
+
+function nextPage(){
+
+    document.getElementById("page1")
+    .classList.add("hidden");
+
+    document.getElementById("page2")
+    .classList.remove("hidden");
+}
+
+function prevPage(){
+
+    document.getElementById("page2")
+    .classList.add("hidden");
+
+    document.getElementById("page1")
+    .classList.remove("hidden");
+}
+
+</script>
+
+</body>
+
+</html>
